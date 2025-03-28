@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Объявления</title>
+</head>
+<body>
+    <h1>Список объявлений</h1>
+    <ul>
+        {% for ad in ads %}
+            <li><a href="{% url 'ad_detail' ad.id %}">{{ ad.title }}</a> - {{ ad.price }} руб.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

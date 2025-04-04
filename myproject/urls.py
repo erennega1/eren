@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from ads import views  
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('ads/', include('ads.urls')),  # Подключаем маршруты приложения ads
+    path('ads/', include('ads.urls')),  
+    path('users/', include('users.urls')),
+    path('', views.ad_list, name='home'),  
 ]
+print()

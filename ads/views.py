@@ -3,11 +3,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Ad
 from .forms import AdForm
-import logging
-logger = logging.getLogger(__name__)
+
 def ad_list(request):
-    logger.info("Функция ad_list вызвана")
-    ads = Ad.objects.all().order_by('-id')
+    ads = Ad.objects.all()
+    print("Объявлений в базе:", ads.count())
+
+    for ad in ads:
+        print(f"{ad.id}: {ad.title}")
+
     paginator = Paginator(ads, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

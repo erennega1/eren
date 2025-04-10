@@ -1,44 +1,35 @@
-{% load static %}
 {% extends 'base.html' %}
-
 {% block content %}
-  <h1>Объявления</h1>
-
-  <p>Объявлений: {{ page_obj|length }}</p>
-
+<h1 style="color:red;">ШАБЛОН ПОДКЛЮЧЕН</h1>
   <ul>
     {% for ad in page_obj %}
       <li>
-        <h3>{{ ad.title }}</h3>
+        <h2>{{ ad.title }}</h2>
         <p>{{ ad.description }}</p>
-        <p>{{ ad.price }} ₸</p>
-
+        <p>Цена: {{ ad.price }}</p>
         {% if ad.image %}
           <img src="{{ ad.image.url }}" alt="{{ ad.title }}" style="max-width: 300px;">
-        {% else %}
-          <p><em>Нет изображения</em></p>
         {% endif %}
       </li>
     {% empty %}
-      <li><em>Объявлений пока нет.</em></li>
+      <li>Объявлений пока нет.</li>
     {% endfor %}
   </ul>
-
   <div class="pagination">
     <span class="step-links">
-      {% if page_obj.has_previous %}
-        <a href="?page=1">&laquo; Первая</a>
-        <a href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
-      {% endif %}
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; первая</a>
+            <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+        {% endif %}
 
-      <span class="current">
-        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
-      </span>
+        <span class="current">
+            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+        </span>
 
-      {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">Следующая</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}">Последняя &raquo;</a>
-      {% endif %}
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+        {% endif %}
     </span>
   </div>
 {% endblock %}

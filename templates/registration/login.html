@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2 class="mb-4">Вход в аккаунт</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="id_username">Логин</label>
+      <input type="text" name="username" autofocus required id="id_username" class="form-control">
+    </div>
+    <div class="mb-3">
+      <label for="id_password">Пароль</label>
+      <input type="password" name="password" required id="id_password" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary">Войти</button>
+    <a href="{% url 'register' %}" class="btn btn-link">Создать аккаунт</a>
+  </form>
+{% endblock %}

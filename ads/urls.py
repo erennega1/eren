@@ -6,4 +6,5 @@ urlpatterns = [
     path('<int:ad_id>/edit/', views.ad_edit, name='ad_edit'),  
     path('<int:ad_id>/delete/', views.ad_delete, name='ad_delete'),  
     path('<int:ad_id>/', views.ad_detail, name='ad_detail'),  
+    path('my-ads/', views.my_ads, name='my_ads'),
 ]

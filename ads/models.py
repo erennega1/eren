@@ -19,3 +19,21 @@ class Ad(models.Model):
 
     def __str__(self):
         return self.title
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_ads')
+    ad = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='favorites')
+
+    class Meta:
+        unique_together = ('user', 'ad')  
+    def __str__(self):
+        return f"{self.user.username} -> {self.ad.title}"
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    bio = models.TextField(blank=True)  
+
+    def __str__(self):
+        return self.user.username
+    

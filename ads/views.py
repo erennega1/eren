@@ -1,9 +1,9 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Ad
-from .forms import AdForm
-from django.db.models import Q 
+from django.db.models import Q
+from .models import Ad, Favorite, Profile
+from .forms import AdForm, ProfileForm
 
 def ad_list(request):
     query = request.GET.get('q', '')
@@ -50,7 +50,7 @@ def ad_create(request):
         form = AdForm(request.POST, request.FILES)
         if form.is_valid():
             ad = form.save(commit=False)
-            ad.user = request.user  
+            ad.user = request.user
             ad.save()
             return redirect('ad_list')
     else:
@@ -83,10 +83,30 @@ def my_ads(request):
     paginator = Paginator(ads, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    return render(request, 'ads/my_ads.html', {'page_obj': page_obj})
 
-    return render(request, 'ads/my_ads.html', {
-        'page_obj': page_obj
-    })
+@login_required
+def toggle_favorite(request, ad_id):
+    ad = get_object_or_404(Ad, id=ad_id)
+    favorite, created = Favorite.objects.get_or_create(user=request.user, ad=ad)
+    if not created:
+        favorite.delete()
+    return redirect('ad_list')
 
-   
+@login_required
+def favorite_ads(request):
+    favorites = Favorite.objects.filter(user=request.user).select_related('ad')
+    ads = [f.ad for f in favorites]
+    return render(request, 'ads/favorites.html', {'ads': ads})
 
+@login_required
+def profile_view(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = ProfileForm(instance=profile)
+    return render(request, 'ads/profile.html', {'form': form, 'profile': profile})

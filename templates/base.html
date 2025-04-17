@@ -37,27 +37,33 @@
   </style>
 </head>
 <body>
+  
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-      <a class="navbar-brand" href="{% url 'home' %}">Объявления</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
-          <a href="{% url 'ad_list' %}">Главная</a> |
-          <a href="{% url 'my_ads' %}">Мои объявления</a> |
-          {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}">Выйти</a>
-            <li class="nav-item"><span class="nav-link text-white">{{ user.username }}</span></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Выход</a></li>
-          {% else %}
-            <a href="{% url 'login' %}">Войти</a>
-            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Вход</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Регистрация</a></li>
-          {% endif %}
-        </ul>
-      </div>
-    </div>
-  </nav>
+{% if user.is_authenticated %}
+<a href="{% url 'favorites' %}" class="btn btn-outline-info">Мои избранные</a>
+<a href="{% url 'profile' %}" class="btn btn-outline-info">Мой профиль</a> 
+{% endif %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<div class="container">
+  <a class="navbar-brand" href="{% url 'home' %}">Объявления</a>
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav ms-auto">
+      <a href="{% url 'ad_list' %}">Главная</a> |
+      <a href="{% url 'my_ads' %}">Мои объявления</a> |
+      {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}">Выйти</a>
+        <li class="nav-item"><span class="nav-link text-white">{{ user.username }}</span></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Выход</a></li>
+      {% else %}
+        <a href="{% url 'login' %}">Войти</a>
+        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Вход</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Регистрация</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+</nav>
 
   
   <div class="container">

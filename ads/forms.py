@@ -1,6 +1,6 @@
 from django import forms
 from .models import Ad
-
+from .models import Profile
 class AdForm(forms.ModelForm):
     class Meta:
         model = Ad
@@ -23,3 +23,10 @@ class AdForm(forms.ModelForm):
         if price <= 0:
             raise forms.ValidationError("Цена должна быть положительной.")
         return price
+        from django import forms
+from .models import Profile
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['avatar', 'bio']

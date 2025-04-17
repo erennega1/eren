@@ -3,23 +3,37 @@
 {% block content %}
   <h1 class="mb-4">Список объявлений</h1>
 
-  
-  <form method="get" action="{% url 'ad_list' %}" class="mb-4">
-    <div class="input-group">
-      <input type="text" name="q" class="form-control" placeholder="Поиск..." value="{{ query }}">
-      <button class="btn btn-primary" type="submit">Найти</button>
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+      <input type="text" name="q" placeholder="Поиск..." value="{{ query }}" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <input type="number" name="price_min" placeholder="Мин. цена" value="{{ price_min }}" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <input type="number" name="price_max" placeholder="Макс. цена" value="{{ price_max }}" class="form-control">
+    </div>
+    <div class="col-md-3">
+      <select name="category" class="form-select">
+        <option value="">Все категории</option>
+        <option value="electronics" {% if category == "electronics" %}selected{% endif %}>Электроника</option>
+        <option value="vehicles" {% if category == "vehicles" %}selected{% endif %}>Транспорт</option>
+        <option value="real_estate" {% if category == "real_estate" %}selected{% endif %}>Недвижимость</option>
+        <option value="clothing" {% if category == "clothing" %}selected{% endif %}>Одежда</option>
+        <option value="other" {% if category == "other" %}selected{% endif %}>Другое</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">Поиск</button>
     </div>
   </form>
 
-  
   {% if user.is_authenticated %}
     <a href="{% url 'ad_create' %}" class="btn btn-success mb-4">+ Добавить объявление</a>
   {% endif %}
 
-  
   <p>Найдено: {{ page_obj.paginator.count }}</p>
 
-  
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for ad in page_obj %}
       <div class="col">
@@ -32,7 +46,13 @@
             <p class="card-text">{{ ad.description }}</p>
             <p><strong>{{ ad.price }} ₸</strong></p>
             <p class="text-muted">Автор: {{ ad.user.username }}</p>
+
+            <form method="post" action="{% url 'toggle_favorite' ad.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-primary btn-sm mt-2">⭐ В избранное</button>
+            </form>
           </div>
+
           {% if user == ad.user %}
             <div class="card-footer d-flex justify-content-between">
               <a href="{% url 'ad_edit' ad.id %}" class="btn btn-sm btn-warning">Редактировать</a>
@@ -46,7 +66,6 @@
     {% endfor %}
   </div>
 
-  
   <nav aria-label="Page navigation" class="mt-4">
     <ul class="pagination justify-content-center">
       {% if page_obj.has_previous %}
@@ -70,6 +89,9 @@
         </li>
         <li class="page-item">
           <a class="page-link" href="?q={{ query }}&page={{ page_obj.paginator.num_pages }}">&raquo;</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'favorites_list' %}">Мои избранные</a>
         </li>
       {% endif %}
     </ul>

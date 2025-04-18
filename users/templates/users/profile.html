@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Мой профиль</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ user_form.as_p }}
+    {{ profile_form.as_p }}
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+  </form>
+
+  {% if user.profile.avatar %}
+    <hr>
+    <h5>Ваш аватар:</h5>
+    <img src="{{ user.profile.avatar.url }}" alt="avatar" style="max-width: 150px;">
+  {% endif %}
+
+  <hr>
+  <h4>Ваши объявления:</h4>
+  <ul>
+    {% for ad in user.ad_set.all %}
+      <li>
+        <a href="{% url 'ad_detail' ad.id %}">{{ ad.title }}</a> - {{ ad.price }} ₸
+      </li>
+    {% empty %}
+      <li>У вас пока нет объявлений.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

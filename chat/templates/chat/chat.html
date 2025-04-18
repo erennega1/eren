@@ -1,0 +1,22 @@
+<div id="chat-container">
+    <div id="messages">
+        {% for message in messages %}
+        <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+            {{ message.text }}
+        </div>
+        {% endfor %}
+    </div>
+    <input type="text" id="message-input" placeholder="Напишите сообщение...">
+    <button id="send-button">Отправить</button>
+</div>
+
+<script>
+document.getElementById('send-button').addEventListener('click', function() {
+    const text = document.getElementById('message-input').value;
+    fetch('/chat/send/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        body: new URLSearchParams({recipient_id: '{{ recipient.id }}', text: text})
+    }).then(response => response.json());
+});
+</script>

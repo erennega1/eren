@@ -4,8 +4,15 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Ad, Favorite
 from users.models import Profile
+from notifications.models import Notification
 
 def ad_list(request):
+    
+    if request.user.is_authenticated:
+        unread_notifications = Notification.objects.filter(user=request.user, is_read=False)
+    else:
+        unread_notifications = []
+
     query = request.GET.get('q', '')
     price_min = request.GET.get('price_min')
     price_max = request.GET.get('price_max')
@@ -38,7 +45,9 @@ def ad_list(request):
         'price_min': price_min,
         'price_max': price_max,
         'category': category,
+        'unread_notifications': unread_notifications,
     })
+
 
 def ad_detail(request, ad_id):
     ad = get_object_or_404(Ad, id=ad_id)

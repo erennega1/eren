@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'notifications',
+    'django.contrib.humanize',
     'ads', 
     'users',
     
@@ -81,11 +82,14 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.csrf',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.csrf',
             ],
+            'libraries': {
+                'notification_tags': 'notifications.templatetags.notification_tags',
+            }
         },
     },
 ]
@@ -152,7 +156,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 import os
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+if os.name == 'nt':
+    MEDIA_ROOT = MEDIA_ROOT.replace('/', '\\')
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'profile'
+LOGOUT_REDIRECT_URL = 'login'
+
+default_app_config = 'users.apps.UsersConfig'

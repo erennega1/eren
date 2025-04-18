@@ -1,6 +1,8 @@
 from django.urls import path
-from .views import mark_as_read
+from . import views
+
 app_name = 'notifications'
+
 urlpatterns = [
-    path('mark-as-read/<int:notification_id>/', mark_as_read, name='mark_as_read'),
+    path('mark-as-read/<int:pk>/', views.mark_as_read, name='mark_as_read'),
 ]

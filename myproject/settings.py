@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'ads', 
     'users',
+    'chat',
     
 ]
 

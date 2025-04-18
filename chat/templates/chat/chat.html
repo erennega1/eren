@@ -1,22 +1,103 @@
-<div id="chat-container">
-    <div id="messages">
-        {% for message in messages %}
-        <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
-            {{ message.text }}
-        </div>
-        {% endfor %}
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">Чат с {{ recipient.username }}</h4>
+      <a href="{% url 'chat:index' %}" class="btn btn-sm btn-outline-secondary">
+        ← Назад
+      </a>
     </div>
-    <input type="text" id="message-input" placeholder="Напишите сообщение...">
-    <button id="send-button">Отправить</button>
+    
+    <div class="card-body">
+      
+      <div id="chat-messages" class="mb-3 p-3 border rounded bg-light" 
+           style="height: 400px; overflow-y: auto;">
+        {% for message in messages %}
+          <div class="mb-3 {% if message.sender == request.user %}text-end{% endif %}">
+            <div class="d-flex flex-column {% if message.sender == request.user %}align-items-end{% else %}align-items-start{% endif %}">
+              <small class="text-muted mb-1">
+                {{ message.timestamp|date:"H:i" }}
+              </small>
+              <div class="p-2 rounded {% if message.sender == request.user %}bg-primary text-white{% else %}bg-white border{% endif %}" 
+                   style="max-width: 70%;">
+                {{ message.text }}
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted text-center py-4">Нет сообщений. Начните общение!</div>
+        {% endfor %}
+      </div>
+      
+      
+      <form id="chat-form" class="mt-3">
+        {% csrf_token %}
+        <input type="hidden" name="recipient_id" value="{{ recipient.id }}">
+        <div class="input-group">
+          <textarea name="text" class="form-control" 
+                    placeholder="Введите сообщение..." 
+                    rows="2" required></textarea>
+          <button type="submit" class="btn btn-primary">
+            Отправить
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script>
-document.getElementById('send-button').addEventListener('click', function() {
-    const text = document.getElementById('message-input').value;
-    fetch('/chat/send/', {
-        method: 'POST',
-        headers: {'X-CSRFToken': '{{ csrf_token }}'},
-        body: new URLSearchParams({recipient_id: '{{ recipient.id }}', text: text})
-    }).then(response => response.json());
+document.addEventListener('DOMContentLoaded', function() {
+  const chatForm = document.getElementById('chat-form');
+  const chatMessages = document.getElementById('chat-messages');
+  
+  
+  function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+  
+  
+  chatForm.querySelector('textarea').focus();
+  
+  
+  chatForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(chatForm);
+    
+    fetch("{% url 'chat:send_message' %}", {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}'
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        chatForm.reset();
+        
+        window.location.reload();
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  });
+  
+  
+  scrollToBottom();
 });
 </script>
+
+<style>
+  #chat-messages {
+    scroll-behavior: smooth;
+  }
+  #chat-messages::-webkit-scrollbar {
+    width: 8px;
+  }
+  #chat-messages::-webkit-scrollbar-thumb {
+    background: #adb5bd;
+    border-radius: 4px;
+  }
+</style>
+{% endblock %}

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'notifications',
     'django.contrib.humanize',
+    'reviews.apps.ReviewsConfig',
     'ads', 
     'users',
     'chat',

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Здравствуйте, {{ recipient.username }}!</h2>
+    <p>Пользователь {{ author.username }} оставил отзыв на ваше объявление:</p>
+    <h3><a href="{{ ad.get_absolute_url }}">{{ ad.title }}</a></h3>
+    <p>Рейтинг: {{ review.get_rating_display }}</p>
+    <blockquote>{{ review.text }}</blockquote>
+    <p>С уважением,<br>Команда сайта</p>
+</body>
+</html>

@@ -1,16 +1,53 @@
 {% extends 'base.html' %}
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>{{ ad.title }}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <h1>{{ ad.title }}</h1>
-    <p>{{ ad.description }}</p>
-    <p>Цена: {{ ad.price }} руб.</p>
-    <a href="{% url 'ad_list' %}">Вернуться к списку</a>
-    <a href="{% url 'ad_edit' ad.id %}">Редактировать</a>
-    <a href="{% url 'ad_delete' ad.id %}">Удалить</a>
+    <div class="ad-container">
+        <h1>{{ ad.title }}</h1>
+        <p>{{ ad.description }}</p>
+        <p class="price">Цена: {{ ad.price }} тг.</p>
+        
+        <div class="action-buttons">
+            <a href="{% url 'ad_list' %}" class="btn btn-secondary">← Назад</a>
+            {% if request.user == ad.author %}
+                <a href="{% url 'ad_edit' ad.id %}" class="btn btn-edit">✏️ Редактировать</a>
+                <a href="{% url 'ad_delete' ad.id %}" class="btn btn-danger">🗑️ Удалить</a>
+            {% endif %}
+            
+            
+            {% if request.user != ad.author %}
+                <a href="{% url 'chat:room' ad.author.id %}" class="btn btn-chat">💬 Написать продавцу</a>
+            {% endif %}
+            
+            
+            {% if request.user != ad.author %}
+                <a href="{% url 'add_review' ad.id %}" class="btn btn-review">★ Оставить отзыв</a>
+            {% endif %}
+        </div>
+
+        
+        <div class="reviews-section">
+            <h3>Отзывы о продавце:</h3>
+            {% for review in ad.reviews.all %}
+                <div class="review-card {% if review.is_approved %}approved{% else %}pending{% endif %}">
+                    <div class="review-header">
+                        <strong>{{ review.author.username }}</strong>
+                        <span class="rating">{{ review.get_rating_display }}</span>
+                    </div>
+                    <p class="review-text">{{ review.text }}</p>
+                    <small class="review-date">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+            {% empty %}
+                <p>Пока нет отзывов.</p>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>

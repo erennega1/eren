@@ -170,4 +170,9 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'profile'
 LOGOUT_REDIRECT_URL = 'login'
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  
+DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
+
 default_app_config = 'users.apps.UsersConfig'
+
+CSRF_COOKIE_SECURE = True

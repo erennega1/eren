@@ -5,7 +5,8 @@ from django.db.models import Q
 from .models import Ad, Favorite
 from users.models import Profile
 from notifications.models import Notification
-
+from .forms import AdForm
+from django.contrib import messages 
 def ad_list(request):
     
     if request.user.is_authenticated:
@@ -61,9 +62,11 @@ def ad_create(request):
             ad = form.save(commit=False)
             ad.user = request.user
             ad.save()
-            return redirect('ad_list')
+            messages.success(request, 'Объявление успешно создано!')
+            return redirect('ad_detail', ad_id=ad.id)
     else:
         form = AdForm()
+    
     return render(request, 'ads/ad_form.html', {'form': form})
 
 @login_required
@@ -73,16 +76,18 @@ def ad_edit(request, ad_id):
         form = AdForm(request.POST, request.FILES, instance=ad)
         if form.is_valid():
             form.save()
-            return redirect('ad_list')
+            messages.success(request, 'Объявление успешно обновлено!')
+            return redirect('ad_detail', ad_id=ad.id)
     else:
         form = AdForm(instance=ad)
-    return render(request, 'ads/ad_form.html', {'form': form})
+    return render(request, 'ads/ad_form.html', {'form': form, 'ad': ad})
 
 @login_required
 def ad_delete(request, ad_id):
     ad = get_object_or_404(Ad, id=ad_id, user=request.user)
     if request.method == 'POST':
         ad.delete()
+        messages.success(request, 'Объявление успешно удалено!')
         return redirect('ad_list')
     return render(request, 'ads/ad_confirm_delete.html', {'ad': ad})
 

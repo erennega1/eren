@@ -24,7 +24,7 @@ def chat_room(request, user_id=None):
             'messages': messages,
             'users': users
         })
-    return render(request, 'chat/index.html', {'users': users})
+    return render(request, 'chat/room.html', {'recipient': recipient})
 
 @csrf_exempt
 @login_required

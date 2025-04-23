@@ -170,8 +170,12 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'profile'
 LOGOUT_REDIRECT_URL = 'login'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  
-DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'araiulyeren@gmail.com'
+EMAIL_HOST_PASSWORD = 'Eren2007'
 
 default_app_config = 'users.apps.UsersConfig'
 

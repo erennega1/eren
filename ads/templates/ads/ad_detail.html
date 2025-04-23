@@ -15,7 +15,12 @@
         <p class="price">Цена: {{ ad.price }} тг.</p>
         
         <div class="action-buttons">
+
+            {% if user.is_authenticated and user != ad.user %}
+                <a href="{% url 'chat:room_by_ad' ad.id %}" class="btn btn-primary">Написать продавцу</a>
+            {% endif %}
             <a href="{% url 'ad_list' %}" class="btn btn-secondary">← Назад</a>
+            
             {% if request.user == ad.author %}
                 <a href="{% url 'ad_edit' ad.id %}" class="btn btn-edit">✏️ Редактировать</a>
                 <a href="{% url 'ad_delete' ad.id %}" class="btn btn-danger">🗑️ Удалить</a>
@@ -25,6 +30,8 @@
             {% if request.user != ad.author %}
                 <a href="{% url 'chat:room' ad.author.id %}" class="btn btn-chat">💬 Написать продавцу</a>
             {% endif %}
+            {% if request.user == ad.author %}
+
             
             
             {% if request.user != ad.author %}

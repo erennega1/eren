@@ -1,0 +1,45 @@
+.chat-container {
+    display: flex;
+    height: 80vh;
+}
+
+.chat-list {
+    width: 300px;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+}
+
+.chat-window {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.message {
+    margin: 5px;
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 70%;
+}
+
+.message.sent {
+    background: #007bff;
+    color: white;
+    margin-left: auto;
+}
+
+.message.received {
+    background: #f1f1f1;
+    margin-right: auto;
+}
+
+.unread {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}

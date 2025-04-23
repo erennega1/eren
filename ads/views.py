@@ -85,10 +85,20 @@ def ad_edit(request, ad_id):
 @login_required
 def ad_delete(request, ad_id):
     ad = get_object_or_404(Ad, id=ad_id, user=request.user)
+    
     if request.method == 'POST':
-        ad.delete()
-        messages.success(request, 'Объявление успешно удалено!')
-        return redirect('ad_list')
+        try:
+           
+            from reviews.models import Review
+            Review.objects.filter(ad=ad).delete()
+            
+            ad.delete()
+            messages.success(request, 'Объявление и связанные отзывы успешно удалены!')
+            return redirect('ad_list')
+        except Exception as e:
+            messages.error(request, f'Ошибка при удалении: {str(e)}')
+            return redirect('ad_detail', ad_id=ad.id)
+    
     return render(request, 'ads/ad_confirm_delete.html', {'ad': ad})
 
 @login_required

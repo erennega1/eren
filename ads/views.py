@@ -7,6 +7,7 @@ from users.models import Profile
 from notifications.models import Notification
 from .forms import AdForm
 from django.contrib import messages 
+from reviews.models import Review
 def ad_list(request):
     query = request.GET.get('q', '')
     price_min = request.GET.get('price_min')
@@ -43,9 +44,23 @@ def ad_list(request):
     })
 
 
+
 def ad_detail(request, ad_id):
     ad = get_object_or_404(Ad, id=ad_id)
-    return render(request, 'ads/ad_detail.html', {'ad': ad})
+
+    
+    user_review_exists = False
+    if request.user.is_authenticated and request.user != ad.user:
+        user_review_exists = Review.objects.filter(ad=ad, author=request.user).exists()
+
+    
+    review_count = ad.ad_reviews.count()
+
+    return render(request, 'ads/ad_detail.html', {
+        'ad': ad,
+        'user_review_exists': user_review_exists,
+        'review_count': review_count
+    })
 
 @login_required
 def ad_create(request):

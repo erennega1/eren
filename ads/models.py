@@ -9,6 +9,8 @@ class Ad(models.Model):
         ('clothing', 'Одежда'),
         ('other', 'Другое'),
     ]
+    
+    reviews = models.ManyToManyField('reviews.Review', blank=True, related_name='ads_reviews')
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)

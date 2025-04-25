@@ -1,27 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h2 class="mb-4">Мои объявления</h2>
+<div class="container mt-4">
+    <h2 class="mb-4">Мои объявления</h2>
 
-  {% if page_obj %}
-    <ul>
-      {% for ad in page_obj %}
-        <li>
-          <h4>{{ ad.title }}</h4>
-          <p>{{ ad.description }}</p>
-          <p>{{ ad.price }} ₸</p>
-          {% if ad.image %}
-            <img src="{{ ad.image.url }}" alt="{{ ad.title }}" style="max-width: 300px;">
-          {% endif %}
-          <p>
-            <a href="{% url 'ad_edit' ad.id %}" class="btn btn-warning btn-sm">Редактировать</a>
-            <a href="{% url 'ad_delete' ad.id %}" class="btn btn-danger btn-sm">Удалить</a>
-          </p>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>У вас пока нет объявлений.</p>
-  {% endif %}
+    {% if page_obj %}
+        <div class="row">
+            {% for ad in page_obj %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    {% if ad.image %}
+                    <img src="{{ ad.image.url }}" class="card-img-top" alt="{{ ad.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ ad.title }}</h5>
+                        <p class="card-text">{{ ad.price }} ₸</p>
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'ad_detail' ad.id %}" class="btn btn-sm btn-outline-primary">Просмотр</a>
+                            <a href="{% url 'ad_edit' ad.id %}" class="btn btn-sm btn-warning">Редактировать</a>
+                            <a href="{% url 'ad_delete' ad.id %}" class="btn btn-sm btn-danger">Удалить</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">У вас пока нет объявлений.</div>
+    {% endif %}
 
-  {% include 'ads/pagination.html' with page_obj=page_obj %}
+    {% include 'ads/pagination.html' with page_obj=page_obj %}
+</div>
 {% endblock %}

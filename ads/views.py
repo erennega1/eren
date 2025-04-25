@@ -8,18 +8,12 @@ from notifications.models import Notification
 from .forms import AdForm
 from django.contrib import messages 
 def ad_list(request):
-    
-    if request.user.is_authenticated:
-        unread_notifications = Notification.objects.filter(user=request.user, is_read=False)
-    else:
-        unread_notifications = []
-
     query = request.GET.get('q', '')
     price_min = request.GET.get('price_min')
     price_max = request.GET.get('price_max')
     category = request.GET.get('category')
 
-    ads = Ad.objects.all()
+    ads = Ad.objects.all().order_by('-created_at')
 
     if query:
         ads = ads.filter(
@@ -45,8 +39,7 @@ def ad_list(request):
         'query': query,
         'price_min': price_min,
         'price_max': price_max,
-        'category': category,
-        'unread_notifications': unread_notifications,
+        'category': category
     })
 
 
@@ -87,23 +80,16 @@ def ad_delete(request, ad_id):
     ad = get_object_or_404(Ad, id=ad_id, user=request.user)
     
     if request.method == 'POST':
-        try:
-           
-            from reviews.models import Review
-            Review.objects.filter(ad=ad).delete()
-            
-            ad.delete()
-            messages.success(request, 'Объявление и связанные отзывы успешно удалены!')
-            return redirect('ad_list')
-        except Exception as e:
-            messages.error(request, f'Ошибка при удалении: {str(e)}')
-            return redirect('ad_detail', ad_id=ad.id)
+        ad.delete()
+        messages.success(request, 'Объявление успешно удалено!')
+        return redirect('ad_list')
     
     return render(request, 'ads/ad_confirm_delete.html', {'ad': ad})
-
+    
+    return render(request, 'ads/ad_confirm_delete.html', {'ad': ad})
 @login_required
 def my_ads(request):
-    ads = Ad.objects.filter(user=request.user).order_by('-id')
+    ads = Ad.objects.filter(user=request.user).order_by('-created_at')
     paginator = Paginator(ads, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -119,7 +105,7 @@ def toggle_favorite(request, ad_id):
 
 @login_required
 def favorite_ads(request):
-    favorites = Favorite.objects.filter(user=request.user).select_related('ad')
+    favorites = Favorite.objects.filter(user=request.user).select_related('ad').order_by('-ad__created_at')
     ads = [f.ad for f in favorites]
     return render(request, 'ads/favorites.html', {'ads': ads})
 
@@ -134,3 +120,18 @@ def profile_view(request):
     else:
         form = ProfileForm(instance=profile)
     return render(request, 'ads/profile.html', {'form': form, 'profile': profile})
+
+@login_required
+def ad_create(request):
+    if request.method == 'POST':
+        form = AdForm(request.POST, request.FILES)
+        if form.is_valid():
+            ad = form.save(commit=False)
+            ad.user = request.user
+            ad.save()
+            messages.success(request, 'Объявление успешно создано!')
+            return redirect('ad_detail', ad_id=ad.id)
+    else:
+        form = AdForm()
+    
+    return render(request, 'ads/ad_form.html', {'form': form})

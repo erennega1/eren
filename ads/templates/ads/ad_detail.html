@@ -1,60 +1,49 @@
 {% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ ad.title }}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <div class="ad-container">
-        <h1>{{ ad.title }}</h1>
-        <p>{{ ad.description }}</p>
-        <p class="price">Цена: {{ ad.price }} тг.</p>
+{% block content %}
+<div class="ad-container">
+    <h1>{{ ad.title }}</h1>
+    <p>{{ ad.description }}</p>
+    <p class="price">Цена: {{ ad.price }} тг.</p>
+    
+    {% if ad.image %}
+        <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="img-fluid">
+    {% endif %}
+    
+    <div class="action-buttons mt-4">
+        <a href="{% url 'ad_list' %}" class="btn btn-secondary">← Назад</a>
         
-        <div class="action-buttons">
-
-            {% if user.is_authenticated and user != ad.user %}
-                <a href="{% url 'chat:room_by_ad' ad.id %}" class="btn btn-primary">Написать продавцу</a>
-            {% endif %}
-            <a href="{% url 'ad_list' %}" class="btn btn-secondary">← Назад</a>
-            
-            {% if request.user == ad.author %}
-                <a href="{% url 'ad_edit' ad.id %}" class="btn btn-edit">✏️ Редактировать</a>
-                <a href="{% url 'ad_delete' ad.id %}" class="btn btn-danger">🗑️ Удалить</a>
-            {% endif %}
-            
-            
-            {% if request.user != ad.author %}
-                <a href="{% url 'chat:room' ad.author.id %}" class="btn btn-chat">💬 Написать продавцу</a>
-            {% endif %}
-            {% if request.user == ad.author %}
-
-            
-            
-            {% if request.user != ad.author %}
-                <a href="{% url 'add_review' ad.id %}" class="btn btn-review">★ Оставить отзыв</a>
-            {% endif %}
-        </div>
-
-        
-        <div class="reviews-section">
-            <h3>Отзывы о продавце:</h3>
-            {% for review in ad.reviews.all %}
-                <div class="review-card {% if review.is_approved %}approved{% else %}pending{% endif %}">
-                    <div class="review-header">
-                        <strong>{{ review.author.username }}</strong>
-                        <span class="rating">{{ review.get_rating_display }}</span>
-                    </div>
-                    <p class="review-text">{{ review.text }}</p>
-                    <small class="review-date">{{ review.created_at|date:"d.m.Y H:i" }}</small>
-                </div>
-            {% empty %}
-                <p>Пока нет отзывов.</p>
-            {% endfor %}
-        </div>
+        {% if request.user == ad.user %}
+            <a href="{% url 'ad_edit' ad.id %}" class="btn btn-primary">✏️ Редактировать</a>
+            <a href="{% url 'ad_delete' ad.id %}" class="btn btn-danger">🗑️ Удалить</a>
+        {% endif %}
     </div>
-</body>
-</html>
+    <div class="reviews-section mt-5">
+        <h3>Отзывы о продавце</h3>
+        
+        {% for review in ad.ad_reviews.all %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h5>{{ review.get_rating_display }}</h5>
+                    <small>{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <p>{{ review.text }}</p>
+                <div class="text-end">
+                    <small class="text-muted">— {{ review.author.username }}</small>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">Пока нет отзывов.</div>
+        {% endfor %}
+        
+        {% if user.is_authenticated and user != ad.user %}
+        <a href="{% url 'add_review' ad.id %}" class="btn btn-primary">
+            Оставить отзыв
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -2,57 +2,179 @@
 {% load static %}
 
 {% block content %}
+<div class="container py-4 fade-in">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'ad_list' %}">Объявления</a></li>
+            <li class="breadcrumb-item active">{{ ad.title|truncatechars:30 }}</li>
+        </ol>
+    </nav>
 
-<div class="ad-container">
-    <h1>{{ ad.title }}</h1>
-    <p>{{ ad.description }}</p>
-    <p class="price">Цена: {{ ad.price }} тг.</p>
-
-    {% if ad.image %}
-        <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="img-fluid">
-    {% endif %}
-
-    <div class="action-buttons mt-4">
-        <a href="{% url 'ad_list' %}" class="btn btn-secondary">← Назад</a>
-
-        {% if request.user == ad.user %}
-            <a href="{% url 'ad_edit' ad.id %}" class="btn btn-primary">✏️ Редактировать</a>
-            <a href="{% url 'ad_delete' ad.id %}" class="btn btn-danger">🗑️ Удалить</a>
-        {% endif %}
-    </div>
-
-    <div class="reviews-section mt-5">
-        <h3>Отзывы о продавце</h3>
-
-        {% if review_count > 0 %}
-            {% for review in ad.ad_reviews.all %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h5 class="mb-1">{{ review.get_rating_display }}</h5>
-                        <small class="text-muted">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+    <div class="row">
+        <!-- Основной контент -->
+        <div class="col-lg-8">
+            <!-- Галерея -->
+            <div class="card mb-4">
+                <div class="card-body p-0">
+                    {% if ad.image %}
+                    <img src="{{ ad.image.url }}" class="img-fluid w-100" alt="{{ ad.title }}" style="max-height: 500px; object-fit: contain;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
+                        <i class="fas fa-image fa-3x text-muted"></i>
                     </div>
-                    <p class="mb-2">{{ review.text }}</p>
-                    <div class="text-end">
-                        <small class="text-muted">— {{ review.author.username }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Описание -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">{{ ad.title }}</h2>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="price me-3">{{ ad.price }} ₸</span>
+                        <span class="badge bg-success">{{ ad.get_category_display }}</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="h6">Описание</h5>
+                        <p class="mb-0">{{ ad.description|linebreaks }}</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-map-marker-alt text-primary me-2"></i> <strong>Город:</strong> {{ ad.city|default:"Не указан" }}</li>
+                                <li class="mb-2"><i class="fas fa-user text-primary me-2"></i> <strong>Продавец:</strong> {{ ad.user.username }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-calendar-alt text-primary me-2"></i> <strong>Дата:</strong> {{ ad.created_at|date:"d.m.Y" }}</li>
+                                <li class="mb-2"><i class="fas fa-eye text-primary me-2"></i> <strong>Просмотры:</strong> {{ ad.views|default:"0" }}</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <div class="alert alert-info">Пока нет отзывов.</div>
-        {% endif %}
 
-        {% if request.user.is_authenticated and request.user != ad.user %}
-            {% if not user_review_exists %}
-                <a href="{% url 'add_review' ad.id %}" class="btn btn-outline-primary mt-3">
-                    ✍️ Оставить отзыв
-                </a>
-            {% else %}
-                <div class="alert alert-warning mt-3">Вы уже оставили отзыв к этому объявлению.</div>
-            {% endif %}
-        {% endif %}
+            <!-- Отзывы -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="h5 mb-4">
+                        <i class="fas fa-comments text-primary me-2"></i>
+                        Отзывы о продавце
+                        <span class="badge bg-secondary ms-2">{{ review_count }}</span>
+                    </h3>
+
+                    {% if review_count > 0 %}
+                        {% for review in ad.ad_reviews.all %}
+                        <div class="card mb-3 border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <span class="fw-bold">{{ review.author.username }}</span>
+                                        <div class="text-warning small">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= review.rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                                </div>
+                                <p class="mb-0">{{ review.text }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i> Пока нет отзывов о продавце
+                        </div>
+                    {% endif %}
+
+                    {% if request.user.is_authenticated and request.user != ad.user %}
+                        {% if not user_review_exists %}
+                            <a href="{% url 'add_review' ad.id %}" class="btn btn-olx mt-3">
+                                <i class="fas fa-pen me-2"></i>Оставить отзыв
+                            </a>
+                        {% else %}
+                            <div class="alert alert-warning mt-3 mb-0">
+                                <i class="fas fa-exclamation-circle me-2"></i> Вы уже оставили отзыв
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Сайдбар -->
+        <div class="col-lg-4">
+            <!-- Контакты -->
+            <div class="card mb-4 sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h3 class="h5 mb-3">Контактная информация</h3>
+                    
+                    <div class="d-grid gap-2 mb-3">
+                        <button class="btn btn-success btn-lg" id="showPhoneBtn">
+                            <i class="fas fa-phone me-2"></i> Показать телефон
+                        </button>
+                        <button class="btn btn-primary btn-lg">
+                            <i class="fas fa-comment-dots me-2"></i> Написать сообщение
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-info" id="phoneNumber" style="display: none;">
+                        <h4 class="alert-heading h6">Телефон продавца</h4>
+                        <p class="mb-0 fs-5">{{ ad.user.profile.phone|default:"Не указан" }}</p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <img src="{% static 'default-avatar.jpg' %}" class="rounded-circle" width="80" height="80" alt="Аватар">
+                        </div>
+                        <h4 class="h6 mb-1">{{ ad.user.username }}</h4>
+                        <p class="text-muted small mb-3">На сайте с {{ ad.user.date_joined|date:"Y" }} года</p>
+                        <a href="{% url 'user_ads' ad.user.id %}" class="btn btn-outline-primary btn-sm">
+                            Все объявления продавца
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Безопасность -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="h5 mb-3">Безопасные покупки</h3>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Не переводите деньги заранее</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Проверяйте товар перед покупкой</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Встречайтесь в людных местах</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    // Показать телефон
+    document.getElementById('showPhoneBtn').addEventListener('click', function() {
+        const phoneDiv = document.getElementById('phoneNumber');
+        if (phoneDiv.style.display === 'none') {
+            phoneDiv.style.display = 'block';
+            this.innerHTML = '<i class="fas fa-eye-slash me-2"></i> Скрыть телефон';
+        } else {
+            phoneDiv.style.display = 'none';
+            this.innerHTML = '<i class="fas fa-phone me-2"></i> Показать телефон';
+        }
+    });
+</script>
 {% endblock %}
 

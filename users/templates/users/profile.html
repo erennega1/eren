@@ -2,88 +2,208 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="row">
-    <div class="col-md-8 mx-auto">
-      <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-          <h4 class="mb-0">Мой профиль</h4>
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Личный кабинет</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <img src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'default-avatar.jpg' %}{% endif %}" 
+                         class="rounded-circle mb-3" width="150" height="150" alt="Аватар">
+                    
+                    <h3 class="h5">{{ user.username }}</h3>
+                    <p class="text-muted small mb-4">
+                        На сайте с {{ user.date_joined|date:"d.m.Y" }}
+                    </p>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#avatarModal">
+                            <i class="fas fa-camera me-2"></i>Сменить фото
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="h6 mb-3">Контактная информация</h4>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><i class="fas fa-phone me-2"></i> {{ user.profile.phone|default:"Не указан" }}</li>
+                        <li class="mb-2"><i class="fas fa-envelope me-2"></i> {{ user.email }}</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i> {{ user.profile.city|default:"Город не указан" }}</li>
+                    </ul>
+                    <button class="btn btn-sm btn-outline-secondary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#contactsModal">
+                        Редактировать
+                    </button>
+                </div>
+            </div>
         </div>
         
-        <div class="card-body">
-          <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <div class="mb-3">
-              <label class="form-label">Логин:</label>
-              <input type="text" value="{{ user.username }}" class="form-control" readonly>
-            </div>
-            
-            <div class="mb-3">
-              {{ user_form.email.label_tag }}
-              {{ user_form.email }}
-              {% if user_form.email.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ user_form.email.errors }}
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 mb-0">Мои данные</h2>
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#profileModal">
+                            <i class="fas fa-edit me-1"></i>Редактировать
+                        </button>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Имя</label>
+                                <p class="mb-0">{{ user.first_name|default:"Не указано" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Фамилия</label>
+                                <p class="mb-0">{{ user.last_name|default:"Не указано" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h3 class="h5 mb-3">Статистика</h3>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="p-2 border rounded">
+                                <div class="h5 mb-1">{{ ads_count }}</div>
+                                <div class="small text-muted">Объявления</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded">
+                                <div class="h5 mb-1">{{ favorites_count }}</div>
+                                <div class="small text-muted">Избранное</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded">
+                                <div class="h5 mb-1">{{ reviews_count }}</div>
+                                <div class="small text-muted">Отзывы</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              {% endif %}
             </div>
             
-            <div class="mb-3">
-              {{ profile_form.avatar.label_tag }}
-              {{ profile_form.avatar }}
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Последние действия</h2>
+                    <div class="list-group list-group-flush">
+                        {% for action in recent_actions %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <i class="fas fa-{{ action.icon }} me-2 text-{{ action.color }}"></i>
+                                    {{ action.text }}
+                                </div>
+                                <small class="text-muted">{{ action.date|timesince }} назад</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-history fa-2x text-muted mb-3"></i>
+                            <p class="mb-0">Активность не найдена</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-            
-            <div class="mb-3">
-              {{ profile_form.bio.label_tag }}
-              {{ profile_form.bio }}
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-          </form>
-          
-          {% if user.profile.avatar %}
-            <hr>
-            <div class="text-center">
-              <h5>Текущий аватар:</h5>
-              <img src="{{ user.profile.avatar.url }}" 
-                   alt="Аватар {{ user.username }}" 
-                   class="img-thumbnail mt-2" 
-                   style="max-width: 200px;">
-            </div>
-            
-            <img src="{{ user.profile.avatar.url }}" alt="Аватар" class="img-thumbnail">
-            {% else %}
-                <div class="no-avatar">Нет аватара</div>
+        </div>
+    </div>
+</div>
 
-          {% endif %}
+<!-- Модальные окна для редактирования -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'profile' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="profileModalLabel">Редактировать профиль</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
         </div>
-      </div>
-      
-      <div class="card mt-4 shadow-sm">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Ваши объявления</h5>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="id_first_name" class="form-label">Имя:</label>
+            {{ user_form.first_name }}
+          </div>
+          <div class="mb-3">
+            <label for="id_last_name" class="form-label">Фамилия:</label>
+            {{ user_form.last_name }}
+          </div>
         </div>
-        <div class="card-body">
-          {% if user.ad_set.all %}
-            <div class="list-group">
-              {% for ad in user.ad_set.all %}
-                <a href="{% url 'ad_detail' ad.id %}" 
-                   class="list-group-item list-group-item-action">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">{{ ad.title }}</h6>
-                    <small>{{ ad.price }} ₸</small>
-                  </div>
-                  <small class="text-muted">Опубликовано: {{ ad.created_at|date:"d.m.Y" }}</small>
-                </a>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p class="text-muted">У вас пока нет объявлений.</p>
-          {% endif %}
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 </div>
+
+
+<div class="modal fade" id="contactsModal" tabindex="-1" aria-labelledby="contactsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="contactsModalLabel">Редактировать контакты</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="id_phone" class="form-label">Телефон:</label>
+            {{ profile_form.phone }}
+          </div>
+          <div class="mb-3">
+            <label for="id_bio" class="form-label">О себе:</label>
+            {{ profile_form.bio }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="avatarModalLabel">Сменить фото</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="id_avatar" class="form-label">Загрузить новое фото:</label>
+            {{ profile_form.avatar }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

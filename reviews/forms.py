@@ -15,10 +15,7 @@ class ReviewForm(forms.ModelForm):
             'rating': 'Оценка'
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        ad = self.instance.ad if self.instance else self.initial.get('ad')
-        author = self.instance.author if self.instance else self.initial.get('author')
-        if ad and author and Review.objects.filter(ad=ad, author=author).exists():
-            raise ValidationError("Вы уже оставляли отзыв на это объявление")
-        return cleaned_data
+def clean(self):
+    cleaned_data = super().clean()
+    
+    return cleaned_data

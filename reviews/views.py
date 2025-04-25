@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Review
@@ -17,7 +17,7 @@ def add_review(request, ad_id):
         form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
-            review.ad = ad
+            review.ad = ad  
             review.author = request.user
             review.save()
             messages.success(request, 'Спасибо за ваш отзыв!')
@@ -25,4 +25,7 @@ def add_review(request, ad_id):
     else:
         form = ReviewForm()
 
-    return render(request, 'reviews/add_review.html', {'form': form, 'ad': ad})
+    return render(request, 'reviews/add_review.html', {
+        'form': form,
+        'ad': ad
+    })

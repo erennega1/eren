@@ -8,6 +8,7 @@ from notifications.models import Notification
 from .forms import AdForm
 from django.contrib import messages 
 from reviews.models import Review
+from django.contrib.auth.models import User
 def ad_list(request):
     query = request.GET.get('q', '')
     price_min = request.GET.get('price_min')
@@ -150,3 +151,11 @@ def ad_create(request):
         form = AdForm()
     
     return render(request, 'ads/ad_form.html', {'form': form})
+
+def user_ads(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    ads = Ad.objects.filter(user=user).order_by('-created_at')
+    return render(request, 'ads/user_ads.html', {
+        'ads': ads,
+        'seller': user
+    })

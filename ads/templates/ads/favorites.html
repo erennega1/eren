@@ -1,25 +1,67 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-  <h1>Мои избранные</h1>
-  {% if ads %}
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      {% for ad in ads %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Избранное</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3 mb-4">Избранные объявления</h1>
+
+    {% if favorites.exists %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for favorite in favorites %}
         <div class="col">
-          <div class="card h-100">
-            {% if ad.image %}
-              <img src="{{ ad.image.url }}" class="card-img-top" alt="{{ ad.title }}">
-            {% endif %}
-            <div class="card-body">
-              <h5 class="card-title">{{ ad.title }}</h5>
-              <p class="card-text">{{ ad.description }}</p>
-              <p><strong>{{ ad.price }} ₸</strong></p>
-              <p class="text-muted">Автор: {{ ad.user.username }}</p>
+            <div class="card h-100">
+                <div class="position-relative">
+                    {% if favorite.ad.image %}
+                        <img src="{{ favorite.ad.image.url }}" class="card-img-top" alt="{{ favorite.ad.title }}" style="height: 180px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <form method="post" action="{% url 'toggle_favorite' favorite.ad.id %}" class="position-absolute top-0 end-0 m-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm p-0 bg-white rounded-circle" style="width: 30px; height: 30px; line-height: 30px;">
+                            <i class="fas fa-heart text-danger"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="card-body">
+                    <h5 class="card-title mb-1">
+                        <a href="{% url 'ad_detail' favorite.ad.id %}" class="text-decoration-none text-dark">
+                            {{ favorite.ad.title|truncatechars:30 }}
+                        </a>
+                    </h5>
+                    <p class="price mb-2">{{ favorite.ad.price }} ₸</p>
+                    <p class="card-text small text-muted mb-2">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        {{ favorite.ad.city|default:"Не указан" }}
+                    </p>
+                    <p class="card-text small text-muted">
+                        <i class="far fa-clock me-1"></i>
+                        {{ favorite.ad.created_at|timesince }} назад
+                    </p>
+                </div>
             </div>
-          </div>
         </div>
-      {% endfor %}
+        {% endfor %}
     </div>
-  {% else %}
-    <p>У вас пока нет избранных объявлений.</p>
-  {% endif %}
+    {% else %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-heart-broken fa-3x text-muted mb-3"></i>
+            <h4>В избранном пока ничего нет</h4>
+            <p>Добавляйте понравившиеся объявления, нажимая на ♡</p>
+            <a href="{% url 'ad_list' %}" class="btn btn-primary">Перейти к объявлениям</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

@@ -1,100 +1,174 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
-  <h1 class="mb-4">Список объявлений</h1>
+<div class="container py-4 fade-in">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Все объявления</li>
+        </ol>
+    </nav>
 
-  <form method="get" class="row g-2 mb-4">
-    <div class="col-md-3">
-      <input type="text" name="q" placeholder="Поиск..." value="{{ query }}" class="form-control">
+    <!-- Заголовок и кнопка добавления -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Объявления в Казахстане</h1>
+        {% if user.is_authenticated %}
+            <a href="{% url 'ad_create' %}" class="btn btn-olx">
+                <i class="fas fa-plus me-2"></i>Подать объявление
+            </a>
+        {% endif %}
     </div>
-    <div class="col-md-2">
-      <input type="number" name="price_min" placeholder="Мин. цена" value="{{ price_min }}" class="form-control">
-    </div>
-    <div class="col-md-2">
-      <input type="number" name="price_max" placeholder="Макс. цена" value="{{ price_max }}" class="form-control">
-    </div>
-    <div class="col-md-3">
-      <select name="category" class="form-select">
-        <option value="">Все категории</option>
-        <option value="electronics" {% if category == "electronics" %}selected{% endif %}>Электроника</option>
-        <option value="vehicles" {% if category == "vehicles" %}selected{% endif %}>Транспорт</option>
-        <option value="real_estate" {% if category == "real_estate" %}selected{% endif %}>Недвижимость</option>
-        <option value="clothing" {% if category == "clothing" %}selected{% endif %}>Одежда</option>
-        <option value="other" {% if category == "other" %}selected{% endif %}>Другое</option>
-      </select>
-    </div>
-    <div class="col-md-2">
-      <button type="submit" class="btn btn-primary w-100">Поиск</button>
-    </div>
-  </form>
 
-  {% if user.is_authenticated %}
-    <a href="{% url 'ad_create' %}" class="btn btn-success mb-4">+ Добавить объявление</a>
-  {% endif %}
-
-  <p>Найдено: {{ page_obj.paginator.count }}</p>
-
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    {% for ad in page_obj %}
-      <div class="col">
-        <div class="card h-100">
-          {% if ad.image %}
-            <img src="{{ ad.image.url }}" class="card-img-top" alt="{{ ad.title }}">
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title">
-              <a href="{% url 'ad_detail' ad.id %}" class="text-decoration-none text-dark">
-                {{ ad.title }}
-              </a>
-            </h5>
-            <p class="card-text">{{ ad.description }}</p>
-            <p><strong>{{ ad.price }} ₸</strong></p>
-            <p class="text-muted">Автор: {{ ad.user.username }}</p>
-
-            <form method="post" action="{% url 'toggle_favorite' ad.id %}">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-outline-primary btn-sm mt-2">⭐ В избранное</button>
+    <!-- Фильтры -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                        <input type="text" name="q" class="form-control" placeholder="Я ищу..." value="{{ query }}">
+                    </div>
+                </div>
+                
+                <div class="col-md-2">
+                    <select name="category" class="form-select">
+                        <option value="">Все категории</option>
+                        <option value="electronics" {% if category == "electronics" %}selected{% endif %}>Электроника</option>
+                        <option value="vehicles" {% if category == "vehicles" %}selected{% endif %}>Транспорт</option>
+                        <option value="real_estate" {% if category == "real_estate" %}selected{% endif %}>Недвижимость</option>
+                        <option value="clothing" {% if category == "clothing" %}selected{% endif %}>Одежда</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="number" name="price_min" class="form-control" placeholder="От" value="{{ price_min }}">
+                        <span class="input-group-text">-</span>
+                        <input type="number" name="price_max" class="form-control" placeholder="До" value="{{ price_max }}">
+                        <span class="input-group-text">₸</span>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 d-flex">
+                    <button type="submit" class="btn btn-olx flex-grow-1">
+                        <i class="fas fa-filter me-2"></i>Найти
+                    </button>
+                    {% if query or price_min or price_max or category %}
+                        <a href="{% url 'ad_list' %}" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    {% endif %}
+                </div>
             </form>
-          </div>
-
-          {% if user == ad.user %}
-            <div class="card-footer d-flex justify-content-between">
-              <a href="{% url 'ad_edit' ad.id %}" class="btn btn-sm btn-warning">Редактировать</a>
-              <a href="{% url 'ad_delete' ad.id %}" class="btn btn-sm btn-danger">Удалить</a>
-            </div>
-          {% endif %}
         </div>
-      </div>
-    {% empty %}
-      <p>Объявлений пока нет.</p>
-    {% endfor %}
-  </div>
+    </div>
 
-  <nav aria-label="Page navigation" class="mt-4">
-    <ul class="pagination justify-content-center">
-      {% if page_obj.has_previous %}
-        <li class="page-item">
-          <a class="page-link" href="?q={{ query }}&page=1">&laquo;</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">Предыдущая</a>
-        </li>
-      {% endif %}
+    <!-- Количество найденных -->
+    <p class="text-muted mb-3">Найдено: {{ page_obj.paginator.count }} объявлений</p>
 
-      <li class="page-item disabled">
-        <span class="page-link">
-          Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-        </span>
-      </li>
+    <!-- Список объявлений -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for ad in page_obj %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="position-relative">
+                    {% if ad.image %}
+                        <img src="{{ ad.image.url }}" class="card-img-top" alt="{{ ad.title }}" style="height: 180px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <button class="btn btn-sm position-absolute top-0 end-0 m-2 p-0 bg-white rounded-circle" 
+                            style="width: 30px; height: 30px; line-height: 30px;">
+                        <i class="far fa-heart text-danger"></i>
+                    </button>
+                </div>
+                
+                <div class="card-body">
+                    <h5 class="card-title mb-1">
+                        <a href="{% url 'ad_detail' ad.id %}" class="text-decoration-none text-dark">
+                            {{ ad.title|truncatechars:30 }}
+                        </a>
+                    </h5>
+                    <p class="price mb-2">{{ ad.price }} ₸</p>
+                    <p class="card-text small text-muted mb-2">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        {{ ad.city|default:"Не указан" }}
+                    </p>
+                    <p class="card-text small text-muted">
+                        <i class="far fa-clock me-1"></i>
+                        {{ ad.created_at|timesince }} назад
+                    </p>
+                </div>
+                
+                {% if user == ad.user %}
+                <div class="card-footer bg-white border-0 pt-0">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'ad_edit' ad.id %}" class="btn btn-sm btn-outline-warning flex-grow-1">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'ad_delete' ad.id %}" class="btn btn-sm btn-outline-danger flex-grow-1">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                <h4>Объявлений не найдено</h4>
+                <p>Попробуйте изменить параметры поиска</p>
+                <a href="{% url 'ad_list' %}" class="btn btn-olx">Сбросить фильтры</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 
-      {% if page_obj.has_next %}
-        <li class="page-item">
-          <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">Следующая</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link" href="?q={{ query }}&page={{ page_obj.paginator.num_pages }}">&raquo;</a>
-        </li>
-      {% endif %}
-    </ul>
-  </nav>
+    <!-- Пагинация -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if query %}&q={{ query }}{% endif %}" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
 {% endblock %}

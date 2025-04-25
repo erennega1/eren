@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Объявления пользователя: {{ seller.username }}</h2>
+
+  {% if ads %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3">
+      {% for ad in ads %}
+        <div class="col">
+          <div class="card h-100">
+            {% if ad.image %}
+              <img src="{{ ad.image.url }}" class="card-img-top" alt="{{ ad.title }}">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">
+                <a href="{% url 'ad_detail' ad.id %}" class="text-decoration-none text-dark">
+                  {{ ad.title }}
+                </a>
+              </h5>
+              <p class="card-text">{{ ad.description|truncatewords:15 }}</p>
+              <p><strong>{{ ad.price }} ₸</strong></p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="mt-3">У пользователя пока нет объявлений.</p>
+  {% endif %}
+
+  <a href="{% url 'ad_list' %}" class="btn btn-outline-secondary mt-4">← Назад к списку</a>
+</div>
+{% endblock %}

@@ -20,26 +20,33 @@ class LoginForm(AuthenticationForm):
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
 
 class UserUpdateForm(forms.ModelForm):
-    email = forms.EmailField(required=True, label='Email')
-
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['first_name', 'last_name', 'email', 'username']
         labels = {
-            'username': 'Логин'
+            'username': 'Логин',
+            'email': 'Email',
+            'first_name': 'Имя',
+            'last_name': 'Фамилия',
+        }
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['avatar', 'bio']
+        fields = ['avatar', 'bio', 'phone']
         labels = {
             'avatar': 'Аватар',
-            'bio': 'О себе'
+            'bio': 'О себе',
+            'phone': 'Телефон',
         }
         widgets = {
-            'bio': forms.Textarea(attrs={
-                'rows': 3,
-                'placeholder': 'Расскажите немного о себе...'
-            })
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'avatar': forms.FileInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
         }

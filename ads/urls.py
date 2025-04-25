@@ -10,4 +10,5 @@ urlpatterns = [
     path('my-ads/', views.my_ads, name='my_ads'),
     path('favorites/', views.favorite_ads, name='favorites'),
     path('<int:ad_id>/favorite/', views.toggle_favorite, name='toggle_favorite'),
+    path('user/<int:user_id>/ads/', views.user_ads, name='user_ads'),
 ]

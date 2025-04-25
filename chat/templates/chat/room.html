@@ -1,28 +1,25 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Чат</title>
+    <script>
+        const roomName = "{{ room_name }}";
+        const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
 
-{% block content %}
-<div class="chat-container">
-    <div class="chat-list">
-        <h2>Ваши чаты</h2>
-        <ul>
-            {% for chat in recent_messages %}
-            <li class="{% if chat.unread_count %}unread{% endif %}">
-                <a href="{% url 'chat_with_user' chat.user.id %}">
-                    {{ chat.user.username }}
-                    {% if chat.unread_count %}
-                        <span class="badge">{{ chat.unread_count }}</span>
-                    {% endif %}
-                    <p class="last-message">{{ chat.last_message.text|truncatechars:30 }}</p>
-                    <small>{{ chat.last_message.timestamp|timesince }} назад</small>
-                </a>
-            </li>
-            {% empty %}
-            <li>У вас пока нет сообщений</li>
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="chat-empty">
-        <p>Выберите чат для начала общения</p>
-    </div>
-</div>
-{% endblock %}
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#chat-log').value += (data.message + '\n');
+        };
+
+        function sendMessage() {
+            const message = document.querySelector('#message-input').value;
+            chatSocket.send(JSON.stringify({'message': message}));
+        }
+    </script>
+</head>
+<body>
+    <textarea id="chat-log" rows="20" cols="50"></textarea><br>
+    <input id="message-input" type="text">
+    <button onclick="sendMessage()">Отправить</button>
+</body>
+</html>

@@ -4,15 +4,26 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Max
-from django.db import models
 from .models import Message
 from notifications.models import Notification
 from ads.models import Ad
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 
 User = get_user_model()
 
-def get_recent_chats(user):
+class ChatAdminView(UserPassesTestMixin, TemplateView):
+    template_name = 'chat/admin.html'
     
+    def test_func(self):
+        return self.request.user.is_superuser
+    
+    def handle_no_permission(self):
+        raise PermissionDenied("Доступ запрещён")
+
+def get_recent_chats(user):
+    # Получаем последние сообщения для каждого диалога
     last_messages = Message.objects.filter(
         Q(sender=user) | Q(recipient=user)
     ).values('sender', 'recipient').annotate(
@@ -45,7 +56,6 @@ def get_recent_chats(user):
 
 @login_required
 def chat_room(request, user_id=None, ad_id=None):
-
     users = User.objects.exclude(id=request.user.id)
     current_ad = None
     
@@ -61,7 +71,7 @@ def chat_room(request, user_id=None, ad_id=None):
             Q(sender=recipient, recipient=request.user)
         ).order_by('timestamp')
         
-       
+        # Помечаем сообщения как прочитанные
         Message.objects.filter(
             sender=recipient,
             recipient=request.user,
@@ -84,7 +94,7 @@ def chat_room(request, user_id=None, ad_id=None):
 @require_POST
 def send_message(request):
     recipient_id = request.POST.get('recipient_id')
-    ad_id = request.POST.get('ad_id')
+    ad_id = request.POST.get('ad_id', None)
     text = request.POST.get('text', '').strip()
     
     if not text:
@@ -100,6 +110,7 @@ def send_message(request):
         ad=ad
     )
     
+    # Создаем уведомление
     Notification.objects.create(
         user=recipient,
         message=f"Новое сообщение от {request.user.username}",
@@ -109,6 +120,7 @@ def send_message(request):
     return JsonResponse({
         'status': 'ok',
         'message': {
+            'id': message.id,
             'text': message.text,
             'sender': message.sender.username,
             'time': message.timestamp.strftime("%H:%M"),

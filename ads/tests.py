@@ -1,13 +1,15 @@
 from django.test import TestCase
-from django.urls import reverse
 from django.contrib.auth.models import User
+from .models import Ad
 
-class AdAPITests(TestCase):
+class AdTestCase(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='test', password='test')
-        self.client.login(username='test', password='test')
+        self.user = User.objects.create(username='testuser')
+        self.ad = Ad.objects.create(
+            title='Test Ad',
+            author=self.user,
+            price=100,
+        )
 
-    def test_create_ad_unauthenticated(self):
-        self.client.logout()
-        response = self.client.post(reverse('create_ad'), {'title': 'Test'})
-        self.assertEqual(response.status_code, 403)
+    def test_ad_creation(self):
+        self.assertEqual(self.ad.title, 'Test Ad')

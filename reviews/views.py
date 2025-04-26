@@ -29,3 +29,14 @@ def add_review(request, ad_id):
         'form': form,
         'ad': ad
     })
+
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id, author=request.user)
+
+    if request.method == 'POST':
+        review.delete()
+        messages.success(request, 'Отзыв успешно удален.')
+        return redirect('ad_detail', ad_id=review.ad.id)
+    
+    return redirect('ad_detail', ad_id=review.ad.id)

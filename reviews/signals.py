@@ -10,7 +10,7 @@ def send_review_notification(sender, instance, created, **kwargs):
     if created:
         subject = f'Новый отзыв на ваше объявление "{instance.ad.title}"'
         message = render_to_string('emails/new_review.html', {
-            'recipient': instance.recipient,
+            'recipient':instance.ad.user,
             'author': instance.author,
             'ad': instance.ad,
             'review': instance
@@ -19,7 +19,7 @@ def send_review_notification(sender, instance, created, **kwargs):
             subject,
             message,
             settings.DEFAULT_FROM_EMAIL,
-            [instance.recipient.email],
+            [instance.ad.user.email],
             html_message=message,
             fail_silently=True
         )

@@ -36,12 +36,12 @@
                         <span class="price me-3">{{ ad.price }} ₸</span>
                         <span class="badge bg-success">{{ ad.get_category_display }}</span>
                     </div>
-                    
+
                     <div class="mb-4">
                         <h5 class="h6">Описание</h5>
                         <p class="mb-0">{{ ad.description|linebreaks }}</p>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <ul class="list-unstyled">
@@ -88,6 +88,13 @@
                                     <small class="text-muted">{{ review.created_at|date:"d.m.Y H:i" }}</small>
                                 </div>
                                 <p class="mb-0">{{ review.text }}</p>
+
+                                {% if user == review.author %}
+                                <form action="{% url 'delete_review' review.id %}" method="post" class="mt-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger">Удалить отзыв</button>
+                                </form>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -118,7 +125,7 @@
             <div class="card mb-4 sticky-top" style="top: 20px;">
                 <div class="card-body">
                     <h3 class="h5 mb-3">Контактная информация</h3>
-                    
+
                     <div class="d-grid gap-2 mb-3">
                         <button class="btn btn-success btn-lg" id="showPhoneBtn">
                             <i class="fas fa-phone me-2"></i> Показать телефон
@@ -127,14 +134,14 @@
                             <i class="fas fa-comment-dots me-2"></i> Написать сообщение
                         </button>
                     </div>
-                    
+
                     <div class="alert alert-info" id="phoneNumber" style="display: none;">
                         <h4 class="alert-heading h6">Телефон продавца</h4>
                         <p class="mb-0 fs-5">{{ ad.user.profile.phone|default:"Не указан" }}</p>
                     </div>
-                    
+
                     <hr>
-                    
+
                     <div class="text-center">
                         <div class="mb-3">
                             <img src="{% static 'default-avatar.jpg' %}" class="rounded-circle" width="80" height="80" alt="Аватар">
@@ -147,7 +154,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Безопасность -->
             <div class="card mb-4">
                 <div class="card-body">
@@ -165,7 +172,7 @@
 
 <script>
     // Показать телефон
-    document.getElementById('showPhoneBtn').addEventListener('click', function() {
+    document.getElementById('showPhoneBtn').addEventListener('click', function () {
         const phoneDiv = document.getElementById('phoneNumber');
         if (phoneDiv.style.display === 'none') {
             phoneDiv.style.display = 'block';
@@ -177,4 +184,5 @@
     });
 </script>
 {% endblock %}
+
 

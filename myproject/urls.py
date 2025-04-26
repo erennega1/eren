@@ -28,6 +28,7 @@ urlpatterns = [
     path('notifications/', include('notifications.urls')),
     path('chat/', include('chat.urls')),
     path('', include('reviews.urls')),
+    
 ]
 
 if settings.DEBUG:

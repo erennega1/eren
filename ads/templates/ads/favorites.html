@@ -12,9 +12,9 @@
 
     <h1 class="h3 mb-4">Избранные объявления</h1>
 
-    {% if favorites.exists %}
+    {% if ads %}
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-        {% for favorite in favorites %}
+        {% for ad in ads %}
         <div class="col">
             <div class="card h-100">
                 <div class="position-relative">
